@@ -7,7 +7,7 @@ const adminSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  ticketsBooked: [{ type: mongoose.Schema.Types.ObjectId, ref: "Ticket" }],
+  buses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bus" }],
 })
 
 adminSchema.pre('save', function (next) {

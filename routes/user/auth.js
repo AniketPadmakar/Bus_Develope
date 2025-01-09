@@ -50,6 +50,3 @@ router.post('/signin', async (req, res) => {
 });
 
 module.exports = router
-
-
-Hello World
