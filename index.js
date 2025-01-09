@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 require('./models/User');
 require('./models/Admin');
 require('./models/Bus');
+require('./models/Ticket');
 const Bus = mongoose.model('Bus');
 
 

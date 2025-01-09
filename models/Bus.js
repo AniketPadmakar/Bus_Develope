@@ -18,8 +18,7 @@ const busSchema = new mongoose.Schema({
   arrivalFrom: { type: String, required: true },
   destination: { type: String, required: true },
   frequency: [{ type: String }], 
-  tickets: { type: mongoose.Schema.Types.ObjectId, ref: "Ticket" },
-  // seats: [seatSchema], // Array of seats with status and user info
+  tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: "Ticket" }],
 });
 
 module.exports = mongoose.model("Bus", busSchema);
