@@ -9,28 +9,34 @@ router.post('/signup', async (req, res) => {
     try {
         const { firstName, lastName, email, password } = req.body;
 
+          // Validate required fields
+          if (!firstName || !lastName || !email || !password) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
+        // Check if the user already exists
         const existingUser = await Admin.findOne({ email });
         if (existingUser) {
-            return res.status(409).send({ message: 'Username Already Taken' });
+            return res.status(409).json({ error: "Email already in use" });
         }
 
         const user = new Admin({ firstName, lastName, email, password });
         await user.save();
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
         res.send({ token })
+        res.status(201).json({ message: "Signup successful", token });
       } catch (err) {
-        res.status(400).json({ error: err.message });
-      }
-
+        console.error(err);
+        res.status(500).json({ error: "Internal server error during signup" });
+    }
 });
 
 router.post('/signin', async (req, res) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-      return res.status(422).send({ error: "Must provide username and password" });
-  }
-
+// Validate required fields
+if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+}
   try {
       const user = await Admin.findOne({ email });
       if (!user) {
@@ -44,6 +50,7 @@ router.post('/signin', async (req, res) => {
 
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
       res.send({ token });
+      res.status(200).json({ message: "Signin successful", token });
   } catch (err) {
       return res.status(500).send({ error: "Internal server error" });
   }

@@ -17,7 +17,7 @@ const busSchema = new mongoose.Schema({
   availableSeats: { type: Number, required: true },
   arrivalFrom: { type: String, required: true },
   destination: { type: String, required: true },
-  frequency: [{ type: String }], 
+  frequency: { type: Number},
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: "Ticket" }],
 });
 
