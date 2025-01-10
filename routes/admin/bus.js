@@ -38,10 +38,9 @@ router.post("/add-bus", fetchadmin, async (req, res) => {
 
     // Validate admin existence
     const admin = await Admin.findById(adminId);
-    if (!admin) {
-      return res.status(401).json({ error: "Unauthorized access. Admin not found" });
-    }
-
+    // if (!admin) {
+    //   return res.status(401).json({ error: "Unauthorized access. Admin not found" });
+    // }//
     // Check if a bus with the same bus number already exists
     // const existingBus = await Bus.findOne({ busNumber });
     // if (existingBus) {
@@ -100,10 +99,10 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
     }
 
     // Validate admin existence
-    const admin = await Admin.findById(adminId);
-    if (!admin) {
-      return res.status(401).json({ error: "Unauthorized access. Admin not found" });
-    }
+    // const admin = await Admin.findById(adminId);
+    // if (!admin) {
+    //   return res.status(401).json({ error: "Unauthorized access. Admin not found" });
+    // }
 
     // Find the bus to update
     const bus = await Bus.findById(busId);
@@ -142,9 +141,9 @@ router.get("/view-buses", fetchadmin, async (req, res) => {
   try {
     // Validate admin existence
     const admin = await Admin.findById(id).populate("buses");
-    if (!admin) {
-      return res.status(404).json({ error: "Admin not found" });
-    }
+    // if (!admin) {
+    //   return res.status(404).json({ error: "Admin not found" });
+    // }
 
     res.status(200).json({ buses: admin.buses });
   } catch (error) {
@@ -163,11 +162,11 @@ router.post("/delete-a-bus", fetchadmin, async (req, res) => {
     }
 
     const admin = await Admin.findById(id);
-    if (!admin) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized access. Admin not found" });
-    }
+    // if (!admin) {
+    //   return res
+    //     .status(401)
+    //     .json({ error: "Unauthorized access. Admin not found" });
+    // }
     const bus = await Bus.findById(busId);
     if (!bus) {
       return res.status(404).json({ error: "Bus not found" });
@@ -193,9 +192,9 @@ router.get("/view-total-sales", fetchadmin, async (req, res) => {
   try {
     // Validate admin existence
     const admin = await Admin.findById(adminId).populate("buses"); // Populates buses data
-    if (!admin) {
-      return res.status(401).json({ error: "Admin not found" });
-    }
+    // if (!admin) {
+    //   return res.status(401).json({ error: "Admin not found" });
+    // }
 
     // Calculate total sales
     let totalSales = 0;
@@ -228,11 +227,11 @@ router.put("/reset-booking", fetchadmin, async (req, res) => {
     }
 
     const admin = await Admin.findById(adminId);
-    if (!admin) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized access. Admin not found" });
-    }
+    // if (!admin) {
+    //   return res
+    //     .status(401)
+    //     .json({ error: "Unauthorized access. Admin not found" });
+    // }
     const bus = await Bus.findById(busId);
     if (!bus) {
       return res.status(404).json({ error: "Bus not found" });
