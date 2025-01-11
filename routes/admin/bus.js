@@ -75,7 +75,6 @@ router.post("/add-bus", fetchadmin, async (req, res) => {
     res.status(500).json({ error: "Internal server error while adding the bus" });
   }
 });
-
 // Update an existing bus
 router.put("/update-bus", fetchadmin, async (req, res) => {
   const adminId = req.user.id; // Admin ID from middleware
@@ -98,18 +97,31 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
       return res.status(400).json({ error: "Bus ID is required" });
     }
 
-    // Validate admin existence
-    // const admin = await Admin.findById(adminId);
-    // if (!admin) {
-    //   return res.status(401).json({ error: "Unauthorized access. Admin not found" });
-    // }
-
     // Find the bus to update
     const bus = await Bus.findById(busId);
     if (!bus) {
       return res.status(404).json({ error: "Bus not found" });
     }
 
+    // Check if any updatable field has been provided
+    const updatableFields = [
+      "busName",
+      "operatorName",
+      "rate",
+      "date",
+      "timing",
+      "totalSeats",
+      "arrivalFrom",
+      "destination",
+      "frequency",
+    ];
+    const fieldsToUpdate = updates.filter((field) => updatableFields.includes(field));
+
+    if (fieldsToUpdate.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No valid fields provided for update. Please specify at least one field to update." });
+    }
     // Update bus details
     if (busName) bus.busName = busName;
     if (operatorName) bus.operatorName = operatorName;
