@@ -42,10 +42,15 @@ router.post("/add-bus", fetchadmin, async (req, res) => {
     //   return res.status(401).json({ error: "Unauthorized access. Admin not found" });
     // }//
     // Check if a bus with the same bus number already exists
-    // const existingBus = await Bus.findOne({ busNumber });
-    // if (existingBus) {
-    //   return res.status(400).json({ error: "Bus with this number already exists" });
-    // }
+    const existingBus = await Bus.findOne({  
+      busNumber,
+      destination,
+      arrivalFrom,
+      date,
+      timing, });
+    if (existingBus) {
+      return res.status(400).json({ error: "Bus with this number already exists" });
+    }
 
     // Create a new bus
     const bus = new Bus({
@@ -75,6 +80,7 @@ router.post("/add-bus", fetchadmin, async (req, res) => {
     res.status(500).json({ error: "Internal server error while adding the bus" });
   }
 });
+
 // Update an existing bus
 router.put("/update-bus", fetchadmin, async (req, res) => {
   const adminId = req.user.id; // Admin ID from middleware
@@ -93,9 +99,9 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
 
   try {
     // Validate required fields
-    if (!busId) {
-      return res.status(400).json({ error: "Bus ID is required" });
-    }
+    // if (!busId) {
+    //   return res.status(400).json({ error: "Bus ID is required" });
+    // }
 
     // Find the bus to update
     const bus = await Bus.findById(busId);
@@ -156,7 +162,6 @@ router.get("/view-buses", fetchadmin, async (req, res) => {
     // if (!admin) {
     //   return res.status(404).json({ error: "Admin not found" });
     // }
-
     res.status(200).json({ buses: admin.buses });
   } catch (error) {
     console.error(error);
@@ -198,70 +203,70 @@ router.post("/delete-a-bus", fetchadmin, async (req, res) => {
   }
 });
 
-router.get("/view-total-sales", fetchadmin, async (req, res) => {
-  const adminId = req.user.id; // Admin ID from middleware
+// router.get("/view-total-sales", fetchadmin, async (req, res) => {
+//   const adminId = req.user.id; // Admin ID from middleware
 
-  try {
-    // Validate admin existence
-    const admin = await Admin.findById(adminId).populate("buses"); // Populates buses data
-    // if (!admin) {
-    //   return res.status(401).json({ error: "Admin not found" });
-    // }
+//   try {
+//     // Validate admin existence
+//     const admin = await Admin.findById(adminId).populate("buses"); // Populates buses data
+//     // if (!admin) {
+//     //   return res.status(401).json({ error: "Admin not found" });
+//     // }
 
-    // Calculate total sales
-    let totalSales = 0;
-    for (const busId of admin.buses) {
-      const bus = await Bus.findById(busId);
-      if (bus) {
-        totalSales += bus.rate * (bus.totalSeats - bus.availableSeats);
-      }
-    }
+//     // Calculate total sales
+//     let totalSales = 0;
+//     for (const busId of admin.buses) {
+//       const bus = await Bus.findById(busId);
+//       if (bus) {
+//         totalSales += bus.rate * (bus.totalSeats - bus.availableSeats);
+//       }
+//     }
 
-    res
-      .status(200)
-      .json({ totalSales, message: "Total sales calculated successfully" });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while calculating total sales" });
-  }
-});
+//     res
+//       .status(200)
+//       .json({ totalSales, message: "Total sales calculated successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while calculating total sales" });
+//   }
+// });
 
-// Reset all bookings for a specific bus
-router.put("/reset-booking", fetchadmin, async (req, res) => {
-  const adminId = req.user.id; // Admin ID from token
-  const { busId } = req.body; // Bus ID from frontend
+// // Reset all bookings for a specific bus
+// router.put("/reset-booking", fetchadmin, async (req, res) => {
+//   const adminId = req.user.id; // Admin ID from token
+//   const { busId } = req.body; // Bus ID from frontend
 
-  try {
-    if (!busId) {
-      return res.status(400).json({ error: "Bus ID is required" });
-    }
+//   try {
+//     if (!busId) {
+//       return res.status(400).json({ error: "Bus ID is required" });
+//     }
 
-    const admin = await Admin.findById(adminId);
-    // if (!admin) {
-    //   return res
-    //     .status(401)
-    //     .json({ error: "Unauthorized access. Admin not found" });
-    // }
-    const bus = await Bus.findById(busId);
-    if (!bus) {
-      return res.status(404).json({ error: "Bus not found" });
-    }
+//     const admin = await Admin.findById(adminId);
+//     // if (!admin) {
+//     //   return res
+//     //     .status(401)
+//     //     .json({ error: "Unauthorized access. Admin not found" });
+//     // }
+//     const bus = await Bus.findById(busId);
+//     if (!bus) {
+//       return res.status(404).json({ error: "Bus not found" });
+//     }
 
-    // Reset the availableSeats to totalSeats
-    bus.availableSeats = bus.totalSeats;
-    await bus.save();
+//     // Reset the availableSeats to totalSeats
+//     bus.availableSeats = bus.totalSeats;
+//     await bus.save();
 
-    res.status(200).json({
-      message: "All bookings reset successfully. All seats are now available.",
-    });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while resetting bookings" });
-  }
-});
+//     res.status(200).json({
+//       message: "All bookings reset successfully. All seats are now available.",
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while resetting bookings" });
+//   }
+// });
 
 module.exports = router;

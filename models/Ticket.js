@@ -9,6 +9,6 @@ const ticketSchema = new mongoose.Schema({
     from: { type: String, required: true },
     to: { type: String, required: true },
     seatNumber: { type: Number, require: true}
-})
+}, { timestamps: true });
 
 module.exports = mongoose.model("Ticket", ticketSchema);
