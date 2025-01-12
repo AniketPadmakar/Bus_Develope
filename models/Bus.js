@@ -1,11 +1,5 @@
 const mongoose = require("mongoose");
 
-// const seatSchema = new mongoose.Schema({
-//   seatNumber: { type: Number, required: true },
-//   isBooked: { type: Boolean, default: false },
-//   bookedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, // User who booked the seat
-// });
-
 const busSchema = new mongoose.Schema({
   busName: { type: String, required: true },
   busNumber: { type: String, required: true, unique: true },
@@ -17,8 +11,8 @@ const busSchema = new mongoose.Schema({
   availableSeats: { type: Number, required: true },
   arrivalFrom: { type: String, required: true },
   destination: { type: String, required: true },
-  frequency: { type: Number},
+  frequency: { type: Number }, // Frequency in days for resetting availability
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: "Ticket" }],
-});
+}, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 
 module.exports = mongoose.model("Bus", busSchema);

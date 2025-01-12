@@ -138,4 +138,51 @@ router.get('/view-tickets', fetchusers, async (req, res) => {
         res.status(500).json({ error: 'An error occurred while fetching tickets' });
     }
 });
+
+// Submit a user query
+router.post("/submit-query", async (req, res) => {
+    const { name, email, query, ticketId } = req.body;
+  
+    try {
+      // Validate required fields
+      if (!name || !email || !query || !ticketId) {
+        return res
+          .status(400)
+          .json({ error: "All fields, including ticketId, are required." });
+      }
+  
+      // Validate ticketId (optional: check if it exists in the Ticket collection)
+      const ticket = await Ticket.findById(ticketId);
+      if (!ticket) {
+        return res.status(404).json({ error: "Invalid ticketId. Ticket not found." });
+      }
+  
+      // Generate a unique queryId (e.g., based on timestamp and random number)
+      const queryId = `QRY-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  
+      // Create a new query
+      const newQuery = new Query({
+        queryId,
+        name,
+        email,
+        query,
+        ticketId,
+      });
+  
+      // Save the query to the database
+      const savedQuery = await newQuery.save();
+  
+      res.status(201).json({
+        message: "Query submitted successfully.",
+        query: savedQuery,
+      });
+    } catch (error) {
+      console.error("Error submitting query:", error);
+      res
+        .status(500)
+        .json({ error: "Internal server error while submitting the query." });
+    }
+  });
+
+
 module.exports = router;

@@ -29,26 +29,33 @@ app.use("/api/admin", require("./routes/admin/bus"))
 
 // Schedule a cron job to run at midnight every day
 cron.schedule('0 0 * * *', async () => {
-  try {
-      console.log('Running automatic booking reset job...');
-
-      // Get the current day of the week
-      const today = new Date().toLocaleString('en-US', { weekday: 'long' });
-
-      // Find buses with a matching frequency for today
-      const busesToReset = await Bus.find({ frequency: today });
-
-      // Reset availability for each bus
-      for (const bus of busesToReset) {
-          bus.availableSeats = bus.totalSeats;
-          await bus.save();
-      }
-
-      console.log('Booking reset complete for buses:', busesToReset.map(bus => bus.busName));
-  } catch (error) {
-      console.error('Error during automatic booking reset:', error);
-  }
-});
+    try {
+        console.log('Running automatic booking reset job...');
+  
+        // Get the current date
+        const today = new Date();
+  
+        // Find all buses
+        const buses = await Bus.find();
+  
+        // Reset availability for buses based on frequency
+        for (const bus of buses) {
+            // Use bus creation date (or another date field) for reset logic
+            const busCreationDate = new Date(bus.createdAt); // Replace createdAt with the existing date field
+            const diffInDays = Math.floor((today - busCreationDate) / (1000 * 60 * 60 * 24)); // Calculate the difference in days
+  
+            if (diffInDays % bus.frequency === 0) { // Check if the bus should reset today
+                bus.availableSeats = bus.totalSeats; // Reset seats
+                await bus.save(); // Save the updated bus data
+                console.log(`Reset availability for bus: ${bus.busName}`);
+            }
+        }
+  
+        console.log('Booking reset job completed.');
+    } catch (error) {
+        console.error('Error during automatic booking reset:', error);
+    }
+  });  
 
 
 
