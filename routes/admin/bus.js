@@ -5,6 +5,7 @@ const fetchadmin = require("../../middleware/fetchadmin");
 const router = express.Router();
 const Admin = mongoose.model("Admin");
 const Bus = mongoose.model("Bus");
+const Ticket = mongoose.model("Ticket");
 
 // Add a new bus
 router.post("/add-bus", fetchadmin, async (req, res) => {
