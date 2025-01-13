@@ -42,14 +42,17 @@ router.post("/add-bus", fetchadmin, async (req, res) => {
     //   return res.status(401).json({ error: "Unauthorized access. Admin not found" });
     // }//
     // Check if a bus with the same bus number already exists
-    const existingBus = await Bus.findOne({  
+    const existingBus = await Bus.findOne({
       busNumber,
       destination,
       arrivalFrom,
       date,
-      timing, });
+      timing,
+    });
     if (existingBus) {
-      return res.status(400).json({ error: "Bus with this number already exists" });
+      return res
+        .status(400)
+        .json({ error: "Bus with this number already exists" });
     }
 
     // Create a new bus
@@ -77,7 +80,9 @@ router.post("/add-bus", fetchadmin, async (req, res) => {
     res.status(201).json({ message: "Bus added successfully", bus: savedBus });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error while adding the bus" });
+    res
+      .status(500)
+      .json({ error: "Internal server error while adding the bus" });
   }
 });
 
@@ -121,12 +126,17 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
       "destination",
       "frequency",
     ];
-    const fieldsToUpdate = updates.filter((field) => updatableFields.includes(field));
+    const fieldsToUpdate = updates.filter((field) =>
+      updatableFields.includes(field)
+    );
 
     if (fieldsToUpdate.length === 0) {
       return res
         .status(400)
-        .json({ error: "No valid fields provided for update. Please specify at least one field to update." });
+        .json({
+          error:
+            "No valid fields provided for update. Please specify at least one field to update.",
+        });
     }
     // Update bus details
     if (busName) bus.busName = busName;
@@ -146,10 +156,14 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
 
     const updatedBus = await bus.save();
 
-    res.status(200).json({ message: "Bus updated successfully", bus: updatedBus });
+    res
+      .status(200)
+      .json({ message: "Bus updated successfully", bus: updatedBus });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error while updating the bus" });
+    res
+      .status(500)
+      .json({ error: "Internal server error while updating the bus" });
   }
 });
 
@@ -200,6 +214,47 @@ router.post("/delete-a-bus", fetchadmin, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred while deleting the bus" });
+  }
+});
+
+// Get seat bookings for a specific bus along with user details
+router.get("/seat-bookings/:busId", fetchadmin, async (req, res) => {
+  const { busId } = req.params; // Bus ID from request params
+
+  try {
+    // Validate the bus existence
+    const bus = await Bus.findById(busId);
+    if (!bus) {
+      return res.status(404).json({ error: "Bus not found" });
+    }
+
+    // Populate tickets and include user details
+    const tickets = await Ticket.find({ busId }).populate({
+      path: "user", // Assuming there is a reference to the user in Ticket schema
+      select: "firstName lastName email", // Only include specific user fields
+    });
+
+    // If no tickets are booked
+    if (tickets.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No tickets booked for this bus yet", bookings: [] });
+    }
+
+    // Format the response
+    const bookings = tickets.map((ticket) => ({
+      seatNumber: ticket.seatNumber,
+      user: ticket.user,
+    }));
+
+    res
+      .status(200)
+      .json({ message: "Seat bookings retrieved successfully", bookings });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal server error while fetching seat bookings" });
   }
 });
 
