@@ -228,6 +228,34 @@ router.get("/search-buses", async (req, res) => {
         .json({ error: "Internal server error while searching for buses" });
     }
   });
+
+  router.post('/get-booked-seats', async (req, res) => {
+    const { busId } = req.body;
+  
+    // Validate input
+    if (!busId) {
+      return res.status(400).json({ error: 'busId is required' });
+    }
+  
+    try {
+      // Find the bus by its ID and populate the tickets field
+      const bus = await Bus.findById(busId).populate('tickets');
+  
+      // If no bus is found
+      if (!bus) {
+        return res.status(404).json({ error: 'Bus not found' });
+      }
+  
+      // Extract the seat numbers from the populated tickets
+      const bookedSeats = bus.tickets.map((ticket) => ticket.seatNumber);
+  
+      // Respond with the seat numbers as a comma-separated string
+      res.status(200).json({ bookedSeats: bookedSeats.join(',') });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching booked seats' });
+    }
+  });
   
 
 module.exports = router;
