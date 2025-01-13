@@ -219,43 +219,70 @@ router.post("/delete-a-bus", fetchadmin, async (req, res) => {
 });
 
 // Get seat bookings for a specific bus along with user details
-router.get("/seat-bookings", fetchadmin, async (req, res) => {
-  const { busId } = req.body; // Bus ID from request params
+// router.post("/seat-bookings", fetchadmin, async (req, res) => {
+//   const { busId } = req.body; // Bus ID from request params
 
+//   try {
+//     // Validate the bus existence
+//     const bus = await Bus.findById(busId);
+//     if (!bus) {
+//       return res.status(404).json({ error: "Bus not found" });
+//     }
+
+//     // Populate tickets and include user details
+//     const tickets = await Ticket.find({ busId }).populate({
+//       path: "user", // Assuming there is a reference to the user in Ticket schema
+//       select: "firstName lastName email", // Only include specific user fields
+//     });
+
+//     // If no tickets are booked
+//     if (tickets.length === 0) {
+//       return res
+//         .status(200)
+//         .json({ message: "No tickets booked for this bus yet", bookings: [] });
+//     }
+
+//     // Format the response
+//     const bookings = tickets.map((ticket) => ({
+//       seatNumber: ticket.seatNumber,
+//       user: ticket.user,
+//     }));
+
+//     res
+//       .status(200)
+//       .json({ message: "Seat bookings retrieved successfully", bookings });
+//   } catch (error) {
+//     console.error(error);
+//     res
+//       .status(500)
+//       .json({ error: "Internal server error while fetching seat bookings" });
+//   }
+// });
+
+router.post('/view-tickets', async (req, res) => {
   try {
-    // Validate the bus existence
-    const bus = await Bus.findById(busId);
-    if (!bus) {
-      return res.status(404).json({ error: "Bus not found" });
-    }
+      const { busId } = req.body;
 
-    // Populate tickets and include user details
-    const tickets = await Ticket.find({ busId }).populate({
-      path: "user", // Assuming there is a reference to the user in Ticket schema
-      select: "firstName lastName email", // Only include specific user fields
-    });
+      // Validate input
+      if (!busId) {
+          return res.status(400).json({ message: 'busId is required' });
+      }
 
-    // If no tickets are booked
-    if (tickets.length === 0) {
-      return res
-        .status(200)
-        .json({ message: "No tickets booked for this bus yet", bookings: [] });
-    }
+      // Find the bus by its ID
+      const bus = await Bus.findById(busId).populate('tickets');
 
-    // Format the response
-    const bookings = tickets.map((ticket) => ({
-      seatNumber: ticket.seatNumber,
-      user: ticket.user,
-    }));
+      if (!bus) {
+          return res.status(404).json({ message: 'Bus not found' });
+      }
 
-    res
-      .status(200)
-      .json({ message: "Seat bookings retrieved successfully", bookings });
+      // Respond with the tickets data
+      res.status(200).json({
+          message: 'Tickets fetched successfully',
+          tickets: bus.tickets
+      });
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Internal server error while fetching seat bookings" });
+      console.error('Error fetching tickets:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 });
 
