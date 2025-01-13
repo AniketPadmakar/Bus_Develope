@@ -218,8 +218,8 @@ router.post("/delete-a-bus", fetchadmin, async (req, res) => {
 });
 
 // Get seat bookings for a specific bus along with user details
-router.get("/seat-bookings/:busId", fetchadmin, async (req, res) => {
-  const { busId } = req.params; // Bus ID from request params
+router.get("/seat-bookings", fetchadmin, async (req, res) => {
+  const { busId } = req.body; // Bus ID from request params
 
   try {
     // Validate the bus existence
