@@ -105,9 +105,9 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
 
   try {
     // Validate required fields
-    // if (!busId) {
-    //   return res.status(400).json({ error: "Bus ID is required" });
-    // }
+    if (!busId) {
+      return res.status(400).json({ error: "Bus ID is required" });
+    }
 
     // Find the bus to update
     const bus = await Bus.findById(busId);
@@ -115,7 +115,7 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
       return res.status(404).json({ error: "Bus not found" });
     }
 
-    // Check if any updatable field has been provided
+    // List of updatable fields
     const updatableFields = [
       "busName",
       "operatorName",
@@ -127,34 +127,32 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
       "destination",
       "frequency",
     ];
-    const fieldsToUpdate = updates.filter((field) =>
+
+    // Check if any field from req.body is updatable
+    const fieldsToUpdate = Object.keys(req.body).filter((field) =>
       updatableFields.includes(field)
     );
 
     if (fieldsToUpdate.length === 0) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "No valid fields provided for update. Please specify at least one field to update.",
-        });
+      return res.status(400).json({
+        error:
+          "No valid fields provided for update. Please specify at least one field to update.",
+      });
     }
-    // Update bus details
-    if (busName) bus.busName = busName;
-    if (operatorName) bus.operatorName = operatorName;
-    if (rate) bus.rate = rate;
-    if (date) bus.date = date;
-    if (timing) bus.timing = timing;
-    if (totalSeats) {
-      // Adjust available seats proportionally if totalSeats is changed
-      const seatDifference = totalSeats - bus.totalSeats;
-      bus.availableSeats += seatDifference;
-      bus.totalSeats = totalSeats;
-    }
-    if (arrivalFrom) bus.arrivalFrom = arrivalFrom;
-    if (destination) bus.destination = destination;
-    if (frequency) bus.frequency = frequency;
 
+    // Update bus details based on fields provided in the request body
+    fieldsToUpdate.forEach((field) => {
+      if (field === "totalSeats") {
+        // Adjust available seats proportionally if totalSeats is changed
+        const seatDifference = req.body[field] - bus.totalSeats;
+        bus.availableSeats += seatDifference;
+        bus.totalSeats = req.body[field];
+      } else {
+        bus[field] = req.body[field];
+      }
+    });
+
+    // Save the updated bus
     const updatedBus = await bus.save();
 
     res
@@ -165,6 +163,32 @@ router.put("/update-bus", fetchadmin, async (req, res) => {
     res
       .status(500)
       .json({ error: "Internal server error while updating the bus" });
+  }
+});
+
+// Get a specific bus by ID
+router.get("/get-bus/:busId", fetchadmin, async (req, res) => {
+  const { busId } = req.params; // Extract busId from request parameters
+
+  try {
+    // Validate if busId is provided
+    if (!busId) {
+      return res.status(400).json({ error: "Bus ID is required" });
+    }
+
+    // Find the bus by ID
+    const bus = await Bus.findById(busId);
+
+    // Check if the bus exists
+    if (!bus) {
+      return res.status(404).json({ error: "Bus not found" });
+    }
+
+    // Return the bus details
+    res.status(200).json({ bus });
+  } catch (error) {
+    console.error("Error fetching bus details:", error);
+    res.status(500).json({ error: "Internal server error while fetching bus details" });
   }
 });
 
